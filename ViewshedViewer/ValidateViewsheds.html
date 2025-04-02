@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0">
     <title>ArcGIS JS SDK - Load Web Map</title>
@@ -55,11 +54,50 @@
               view: view,
               listItemCreatedFunction: function(event) {
                 const item = event.item;
+
+                // Add the "Zoom to layer" action to all layers
                 item.actionsSections = [[{
                   title: "Zoom to layer",
                   className: "esri-icon-zoom-out-fixed",
                   id: "zoom-to-layer"
                 }]];
+
+                // Only add opacity slider for ImageryTileLayer
+                if (item.layer.type === "imagery-tile") {
+                  // Create a slider to adjust opacity
+                  item.panel = {
+                    content: "opacity-slider",
+                    open: true
+                  };
+
+                  // Create opacity slider with current layer opacity value
+                  const opacitySlider = document.createElement("input");
+                  opacitySlider.type = "range";
+                  opacitySlider.min = 0;
+                  opacitySlider.max = 1;
+                  opacitySlider.step = 0.01;
+                  opacitySlider.value = item.layer.opacity;
+                  opacitySlider.style.width = "100%";
+
+                  // Create a container for the slider with a label
+                  const container = document.createElement("div");
+                  container.className = "esri-widget";
+                  container.style.padding = "0 15px";
+
+                  const label = document.createElement("div");
+                  label.textContent = "Layer Opacity:";
+                  label.style.paddingBottom = "5px";
+
+                  container.appendChild(label);
+                  container.appendChild(opacitySlider);
+
+                  // Change layer opacity based on slider value
+                  opacitySlider.addEventListener("input", function(event) {
+                    item.layer.opacity = event.target.value;
+                  });
+
+                  item.panel.content = container;
+                }
               }
             });
           
@@ -110,10 +148,17 @@
             });
             map.add(flaglerBeachOIDWebLayer0);
             
-           const imageryTileLayer = new ImageryTileLayer({
+           const MB_Viewshed03 = new ImageryTileLayer({
                 url: "https://tiledimageservices.arcgis.com/eoP5lsTDzcIUyaQZ/arcgis/rest/services/_MB_Transect03_/ImageServer"
             });
-            map.add(imageryTileLayer);          
+            MB_Viewshed03.title = "MB_Viewshed03"
+            map.add(MB_Viewshed03);        
+          
+            const MB_Viewshed01 = new ImageryTileLayer({
+                url: "https://tiledimageservices.arcgis.com/eoP5lsTDzcIUyaQZ/arcgis/rest/services/_MB_Transect01_/ImageServer"
+            });
+            MB_Viewshed01.title = "MB_Viewshed01"
+            map.add(MB_Viewshed01);   
         });
 
     </script>
